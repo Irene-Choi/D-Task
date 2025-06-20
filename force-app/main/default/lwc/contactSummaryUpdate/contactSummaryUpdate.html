@@ -1,0 +1,35 @@
+<template>
+    <!-- 1. HEADER (Fixed height) -->
+    <header class="slds-modal__header slds-p-around_medium">
+        <h2 class="slds-text-heading_medium">Contact Summary</h2>
+    </header>
+
+    <!-- 2. errormessage  -->
+    <div if:true={error} class="slds-p-horizontal_medium">
+        <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" role="alert">
+            <span class="slds-assistive-text">Error</span>
+            <span class="slds-icon_container slds-icon-utility-error slds-m-right_x-small" title="Error">
+                <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                    <use xlink:href="/_slds/icons/utility-sprite/svg/symbols.svg#error"></use>
+                </svg>
+            </span>
+            <h2><lightning-formatted-rich-text value={error}></lightning-formatted-rich-text></h2>
+        </div>
+    </div>
+
+    <!-- 3. CONTENT  -->
+    <div class="content-area slds-p-horizontal_medium">
+        <lightning-datatable
+            key-field="id"
+            data={tableData}
+            columns={columns}
+            onrowselection={handleRowSelection}>
+        </lightning-datatable>
+    </div>
+
+    <!-- 4. FOOTER (Fixed height)  -->
+    <footer class="slds-modal__footer slds-p-around_medium slds-text-align_right">
+        <lightning-button label="Cancel" onclick={closeAction}></lightning-button>
+        <lightning-button variant="brand" label="Update" onclick={handleSave} class="slds-m-left_x-small"></lightning-button>
+    </footer>
+</template>
