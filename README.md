@@ -7,17 +7,8 @@ This project demonstrates a deep understanding of Salesforce development best pr
 ## Table of Contents
 
 - [Features](#features)
-- [Architecture Overview](#architecture-overview)
+- [Architecture & Design Decisions](#architecture--design-decisions)
 - [Metadata Components](#metadata-components)
-- [Setup and Deployment](#setup-and-deployment)
-  - [Prerequisites](#prerequisites)
-  - [Deployment Steps](#deployment-steps)
-  - [Post-Deployment Steps](#post-deployment-steps)
-- [How to Use](#how-to-use)
-- [Technical Decisions and Trade-offs](#technical-decisions-and-trade-offs)
-  - [Flow vs. LWC Implementation](#flow-vs-lwc-implementation)
-  - [Error Handling Strategy](#error-handling-strategy)
-  - [Data Model Design](#data-model-design)
 
 ## Features
 
@@ -37,13 +28,13 @@ This solution's architecture was carefully designed to be robust, scalable, and 
 To showcase versatility and analyze trade-offs, the core user-facing feature was built using two different methods:
 
 1.  **Screen Flow + Invocable Apex:**
-    - **Alignment with Client Needs:** This approach was developed first to honor the client's preference for declarative tools. The goal was to provide a solution where they could potentially maintain parts of the logic (e.g., screen text, simple conditional visibility) themselves in the future.
-    - **Technical Observations:** To display dynamic, non-SObject data from Apex in the standard `Data Table` component, certain platform limitations were encountered. This required a more complex implementation involving a **"transformation" pattern** within the Flow (transforming Apex-Defined types to in-memory SObject records and back again) to serve as a workaround. While fully functional, this adds a layer of complexity to the Flow's design.
+  - **Alignment with Client Needs:** This approach was developed first to honor the client's preference for declarative tools. The goal was to provide a solution where they could potentially maintain parts of the logic (e.g., screen text, simple conditional visibility) themselves in the future.
+  - **Technical Observations:** To display dynamic, non-SObject data from Apex in the standard `Data Table` component, certain platform limitations were encountered. This required a more complex implementation involving a **"transformation" pattern** within the Flow (transforming Apex-Defined types to in-memory SObject records and back again) to serve as a workaround. While fully functional, this adds a layer of complexity to the Flow's design.
 
 2.  **Lightning Web Component (LWC):**
--   - **Developer Experience & UI/UX:** The LWC approach offers a more direct and streamlined development experience. It communicates directly with Apex via `@AuraEnabled` methods, eliminating the need for complex Invocable wrappers and in-flow data transformations.
--   - **Outcome:** The result is a cleaner, more intuitive, and highly user-friendly module with superior control over the UI, error handling, and overall user experience. It provides a seamless, single-page application feel within the modal window.
--   
+  - **Developer Experience & UI/UX:** The LWC approach offers a more direct and streamlined development experience. It communicates directly with Apex via `@AuraEnabled` methods, eliminating the need for complex Invocable wrappers and in-flow data transformations.
+  - **Outcome:** The result is a cleaner, more intuitive, and highly user-friendly module with superior control over the UI, error handling, and overall user experience. It provides a seamless, single-page application feel within the modal window.
+ 
 ### Backend: A Bulkified, Reusable Apex Service
 
 A key design decision was to build the core logic in a **reusable and bulk-safe Apex service layer** (`ContactSummaryController`, etc.).
