@@ -70,26 +70,9 @@ export default class ContactSummaryUpdate extends LightningElement {
 
         } catch (error) { // unexpected error 
             let errorMessage = error.body?.message || error.message || 'An unexpected error occurred.';
-            this.showToast('Error', errorMessage, 'error');
+            // this.showToast('Error', errorMessage, 'error');
             this.error = errorMessage;
         }
-
-        // try {
-        //     await saveContactSummaries({ jsonPayload: payloadJson });
-        //     this.showToast('Success', 'Contact summaries updated.', 'success');
-        //     this.closeAction();
-        // } catch (error) {
-        //     // const message = error.body?.message || error.message || 'An unexpected error occurred.';
-        //     // this.showToast('Error', message, 'error');
-
-        //     let errorMessage = 'An unexpected error occurred.';
-        //     // console.log('error.body >> ' + error.body);
-        //     // console.log('error.body.message >> ' + error.body.message);
-        //     if (error && error.body && error.body.message) {
-        //         errorMessage = error.body.message.replace(/\n/g, '<br/>');
-        //     }
-        //     this.error = errorMessage;
-        // }
     }
 
     closeAction() {

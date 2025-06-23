@@ -24,32 +24,4 @@ public with sharing class ContactSummarySaver {
         results.add(response);
         return results;
     }
-
-    // @InvocableMethod(label='Save Contact Summaries' description='Creates or updates Contact Summary records.')
-    // public static void saveContactSummaries(List<ContactSummaryWrappers.SaveRequest> requests) {
-        
-    //     List<Contact_Summary__c> summariesToUpsert = new List<Contact_Summary__c>();
-
-    //     for (ContactSummaryWrappers.SaveRequest request : requests) {
-    //         if (request.accountId == null || request.selectedSummaries == null) continue;
-            
-    //         for (ContactSummaryWrappers.ContactSummary selected : request.selectedSummaries) {
-    //             summariesToUpsert.add(new Contact_Summary__c(
-    //                 Account__c = request.accountId,
-    //                 Contact_Type__c = selected.type,
-    //                 State__c = selected.state,
-    //                 Contact_Count__c = selected.contactCount,
-    //                 Unique_Key__c = request.accountId + '-' + selected.type + '-' + selected.state
-    //             ));
-    //         }
-    //     }
-        
-    //     if (!summariesToUpsert.isEmpty()) {
-    //         try {
-    //             Database.upsert(summariesToUpsert, Contact_Summary__c.Fields.Unique_Key__c, false);
-    //         } catch (Exception e) {
-    //             throw new AuraHandledException(e.getMessage());
-    //         }
-    //     }
-    // }
 }

@@ -63,6 +63,7 @@ public with sharing class ContactSummaryController {
         if (!toUpsert.isEmpty()) {
             try {
                 Database.UpsertResult[] results = Database.upsert(toUpsert, Contact_Summary__c.Fields.Unique_Key__c, true);
+                resp.isSuccess = true;
             } catch (DMLException e) {
                 List<String> errors = new List<String>();
                 for (Integer i = 0; i < e.getNumDml(); i++) {
@@ -73,26 +74,6 @@ public with sharing class ContactSummaryController {
                 resp.errorMessage  = e.getMessage();
             }
         }
-
-        // if (!toUpsert.isEmpty()) {
-        //     Database.UpsertResult[] results = Database.upsert(toUpsert, Contact_Summary__c.Fields.Unique_Key__c, false); // partial success allowed
-        //     List<String> failed = new List<String>();
-
-        //     for (Integer i = 0; i < results.size(); i++) {
-        //         if (!results[i].isSuccess()) {
-        //             String err = results[i].getErrors()[0].getMessage();
-        //             Contact_Summary__c failedRec = toUpsert[i];
-        //             failed.add('Type: ' + failedRec.Contact_Type__c + ', State: ' + failedRec.State__c + ' — ' + err);
-        //         }
-        //     }
-
-        //     if (!failed.isEmpty()) {
-        //         resp.errorMessage  = String.join(failed, '\n');
-        //         // throw new AuraHandledException(String.join(failed, '\n'));
-        //     } else {
-        //         resp.isSuccess = true;
-        //     }
-        // }
         return resp;
     }
 }

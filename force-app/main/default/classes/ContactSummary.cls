@@ -14,7 +14,4 @@ public class ContactSummary {
 
     @AuraEnabled @InvocableVariable(label='Contact Count')
     public Integer count;
-
-    // @AuraEnabled @InvocableVariable(label='Contact selected')
-    // public Boolean selected; // Flow Datatable checkbox binding
 }
