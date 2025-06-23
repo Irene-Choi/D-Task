@@ -1,0 +1,5 @@
+<design:component>
+    <design:attribute name="title" label="Toast Title" />
+    <design:attribute name="message" label="Toast Message" />
+    <design:attribute name="variant" label="Toast Variant (success, error, warning, info)" />
+</design:component>

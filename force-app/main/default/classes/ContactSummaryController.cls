@@ -1,66 +1,53 @@
 public with sharing class ContactSummaryController {
-    
-    public class ContactGroupWrapper {
-        @AuraEnabled public String type;
-        @AuraEnabled public String state;
-        @AuraEnabled public Integer count;
-
-        public ContactGroupWrapper() {}
-
-        public ContactGroupWrapper(String type, String state, Integer count) {
-            this.type = type;
-            this.state = state;
-            this.count = count;
-        }
-    }
-
     @AuraEnabled(cacheable=true)
-    public static Map<Id, List<ContactGroupWrapper>> getGroupedContactCounts(List<Id> accountIds) {
+    public static Map<Id, List<ContactSummary>> getGroupedContactCounts(List<Id> accountIds) {
         // system.debug('accountIds: ' + accountIds);
-        Map<Id, List<ContactGroupWrapper>> resultMap = new Map<Id, List<ContactGroupWrapper>>();
+        Map<Id, List<ContactSummary>> resultMap = new Map<Id, List<ContactSummary>>();
 
         for (AggregateResult ar : [
-            SELECT AccountId, Type__c, MailingStateCode, COUNT(Id) cnt
+            SELECT AccountId, Type__c type, MailingStateCode state, COUNT(Id) cnt
             FROM Contact
             WHERE AccountId IN :accountIds
             GROUP BY AccountId, Type__c, MailingStateCode
         ]) {
             Id accId = (Id) ar.get('AccountId');
-            String type = (String) ar.get('Type__c');
-            String state = (String) ar.get('MailingStateCode');
-            Integer count = (Integer) ar.get('cnt');
-
-            ContactGroupWrapper wrapper = new ContactGroupWrapper(type, state, count);
+            ContactSummary row = new ContactSummary();
+            row.type = (String) ar.get('type');
+            row.state = (String) ar.get('state');
+            row.count = (Integer) ar.get('cnt');
 
             if (!resultMap.containsKey(accId)) {
-                resultMap.put(accId, new List<ContactGroupWrapper>());
+                resultMap.put(accId, new List<ContactSummary>());
             }
-            resultMap.get(accId).add(wrapper);
+            resultMap.get(accId).add(row);
         }
-        // system.debug('resultMap: ' + resultMap);
 
         return resultMap;
     }
 
     @AuraEnabled
-    public static void saveContactSummaries(String jsonPayload) {
-        Map<Id, List<ContactGroupWrapper>> accountToSelections = 
-            (Map<Id, List<ContactGroupWrapper>>)JSON.deserialize(
+    public static ServiceResponse saveContactSummaries(String jsonPayload) {
+        ServiceResponse resp = new ServiceResponse();
+
+        Map<Id, List<ContactSummary>> accountToSelections = 
+            (Map<Id, List<ContactSummary>>)JSON.deserialize(
                 jsonPayload,
-                Map<Id, List<ContactGroupWrapper>>.class
+                Map<Id, List<ContactSummary>>.class
             );
 
         if (accountToSelections == null || accountToSelections.isEmpty()) {
-            throw new AuraHandledException('Invalid input.');
+            resp.errorMessage = 'Please select at least one row.';
+            return resp;
+            // throw new AuraHandledException('Invalid input.');
         }
-        // system.debug('accountToSelections: ' + accountToSelections);
+        system.debug('accountToSelections: ' + accountToSelections);
         Set<Id> accountIds = accountToSelections.keySet();
 
         List<Contact_Summary__c> toUpsert = new List<Contact_Summary__c>();
 
         for (Id accId : accountToSelections.keySet()) {
-            List<ContactGroupWrapper> selectedRows = accountToSelections.get(accId);
-            for (ContactGroupWrapper wrapper : selectedRows) {
+            List<ContactSummary> selectedRows = accountToSelections.get(accId);
+            for (ContactSummary wrapper : selectedRows) {
                 String uniqueKey = accId + '-' + wrapper.type + '-' + wrapper.state;
 
                 toUpsert.add(new Contact_Summary__c(
@@ -74,20 +61,38 @@ public with sharing class ContactSummaryController {
         }
 
         if (!toUpsert.isEmpty()) {
-            Database.UpsertResult[] results = Database.upsert(toUpsert, Contact_Summary__c.Fields.Unique_Key__c, true);
-            List<String> failed = new List<String>();
-
-            for (Integer i = 0; i < results.size(); i++) {
-                if (!results[i].isSuccess()) {
-                    String err = results[i].getErrors()[0].getMessage();
-                    Contact_Summary__c failedRec = toUpsert[i];
-                    failed.add('Type: ' + failedRec.Contact_Type__c + ', State: ' + failedRec.State__c + ' — ' + err);
+            try {
+                Database.UpsertResult[] results = Database.upsert(toUpsert, Contact_Summary__c.Fields.Unique_Key__c, true);
+            } catch (DMLException e) {
+                List<String> errors = new List<String>();
+                for (Integer i = 0; i < e.getNumDml(); i++) {
+                    errors.add(e.getDmlMessage(i));
                 }
-            }
-
-            if (!failed.isEmpty()) {
-                throw new AuraHandledException(String.join(failed, '\n'));
+                resp.errorMessage = String.join(errors, '\n');
+            } catch (Exception e) {
+                resp.errorMessage  = e.getMessage();
             }
         }
+
+        // if (!toUpsert.isEmpty()) {
+        //     Database.UpsertResult[] results = Database.upsert(toUpsert, Contact_Summary__c.Fields.Unique_Key__c, false); // partial success allowed
+        //     List<String> failed = new List<String>();
+
+        //     for (Integer i = 0; i < results.size(); i++) {
+        //         if (!results[i].isSuccess()) {
+        //             String err = results[i].getErrors()[0].getMessage();
+        //             Contact_Summary__c failedRec = toUpsert[i];
+        //             failed.add('Type: ' + failedRec.Contact_Type__c + ', State: ' + failedRec.State__c + ' — ' + err);
+        //         }
+        //     }
+
+        //     if (!failed.isEmpty()) {
+        //         resp.errorMessage  = String.join(failed, '\n');
+        //         // throw new AuraHandledException(String.join(failed, '\n'));
+        //     } else {
+        //         resp.isSuccess = true;
+        //     }
+        // }
+        return resp;
     }
 }
