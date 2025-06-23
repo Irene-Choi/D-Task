@@ -44,7 +44,7 @@ A key design decision was to build the core logic in a **reusable and bulk-safe 
 
 ### Data Model & Error Handling
 
-- A custom object `Contact_Summary__c` uses a formula-driven `Unique_Key__c` (External ID) to enable efficient `Database.upsert` operations.
+- A custom object `Contact_Summary__c` uses a `Unique_Key__c` (External ID) to enable efficient `Database.upsert` operations.
 - Error handling is managed within a `try-catch` block in Apex. The `allOrNone=true` setting in the `upsert` call ensures data integrity by rolling back the entire transaction on any failure. A user-friendly error message is then surfaced to the UI.
 
 **Shared Backend:**
